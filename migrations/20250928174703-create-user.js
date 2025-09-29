@@ -21,6 +21,14 @@ module.exports = {
       password: {
         type: Sequelize.STRING
       },
+      restPasswordToken: {
+        type: Sequelize.STRING,
+        allowNull: true
+      },
+      restPasswordExpires: {
+        type: Sequelize.DATE,
+        allowNull: true
+      },
       createdAt: {
         allowNull: false,
         type: Sequelize.DATE
@@ -33,5 +41,7 @@ module.exports = {
   },
   async down(queryInterface, Sequelize) {
     await queryInterface.dropTable('Users');
+    await queryInterface.removeColumn('Users', 'restPasswordToken');
+    await queryInterface.removeColumn('Users', 'restPasswordExpires');
   }
 };

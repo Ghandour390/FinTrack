@@ -1,0 +1,148 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Profil utilisateur</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+        }
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+            border-left: 4px solid #28a745;
+        }
+        .profile-card {
+            background-color: white;
+            padding: 40px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 500px;
+        }
+        .user-info {
+            margin-bottom: 20px;
+        }
+        .user-info h3 {
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .user-detail {
+            display: flex;
+            justify-content: space-between;
+            padding: 10px 0;
+            border-bottom: 1px solid #eee;
+        }
+        .user-detail:last-child {
+            border-bottom: none;
+        }
+        .label {
+            font-weight: bold;
+            color: #555;
+        }
+        .value {
+            color: #333;
+        }
+        .actions {
+            margin-top: 30px;
+            text-align: center;
+        }
+        button {
+            background-color: #4CAF50;
+            color: white;
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background-color 0.3s;
+            margin: 0 10px;
+        }
+        button:hover {
+            background-color: #45a049;
+        }
+        .logout-btn {
+            background-color: #dc3545;
+        }
+        .logout-btn:hover {
+            background-color: #c82333;
+        }
+        .back-link {
+            text-align: center;
+            margin-top: 20px;
+        }
+        .back-link a {
+            color: #0066cc;
+            text-decoration: none;
+            font-size: 14px;
+        }
+        .back-link a:hover {
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+    <h1>👤 Profil utilisateur</h1>
+    
+    <% if (typeof message !== 'undefined') { %>
+        <div class="success-message">
+            ✅ <%= message %>
+        </div>
+    <% } %>
+    
+    <div class="profile-card">
+        <div class="user-info">
+            <h3>📋 Informations personnelles</h3>
+            <% if (typeof user !== 'undefined' && user) { %>
+                <div class="user-detail">
+                    <span class="label">Nom :</span>
+                    <span class="value"><%= user.lastName %></span>
+                </div>
+                <div class="user-detail">
+                    <span class="label">Prénom :</span>
+                    <span class="value"><%= user.firstName %></span>
+                </div>
+                <div class="user-detail">
+                    <span class="label">Email :</span>
+                    <span class="value"><%= user.email %></span>
+                </div>
+                <div class="user-detail">
+                    <span class="label">Statut :</span>
+                    <span class="value">✅ Compte actif</span>
+                </div>
+            <% } else { %>
+                <div class="user-detail">
+                    <span class="value">Aucune information utilisateur disponible</span>
+                </div>
+            <% } %>
+        </div>
+        
+        <div class="actions">
+            <button onclick="window.location.href='/users/modifieMotpasse'">🔐 Changer le mot de passe</button>
+            <button class="logout-btn" onclick="window.location.href='/users/login'">🚪 Déconnexion</button>
+        </div>
+    </div>
+    
+    <div class="back-link">
+        <a href="/">← Retour à l'accueil</a>
+    </div>
+</body>
+</html>

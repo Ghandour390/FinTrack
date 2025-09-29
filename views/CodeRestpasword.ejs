@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Oublie de mot de passe</title>
+    <title>Code de réinitialisation</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -21,14 +21,32 @@
             margin-bottom: 30px;
             text-align: center;
         }
-        .info-message {
-            background-color: #e7f3ff;
-            color: #0066cc;
+        .success-message {
+            background-color: #d4edda;
+            color: #155724;
             padding: 15px;
             border-radius: 4px;
             margin-bottom: 20px;
             text-align: center;
-            border-left: 4px solid #0066cc;
+            border-left: 4px solid #28a745;
+        }
+        .email-info {
+            background-color: #fff3cd;
+            color: #856404;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+            border-left: 4px solid #ffc107;
+        }
+        .error-message {
+            background-color: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+            border-left: 4px solid #dc3545;
         }
         form {
             background-color: white;
@@ -54,6 +72,9 @@
             border-radius: 4px;
             box-sizing: border-box;
             font-size: 16px;
+            text-align: center;
+            letter-spacing: 2px;
+            font-weight: bold;
         }
         input:focus {
             outline: none;
@@ -87,27 +108,46 @@
         .back-link a:hover {
             text-decoration: underline;
         }
+        .instructions {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 20px;
+            text-align: center;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
-    <h1>🔐 Oubli de mot de passe</h1>
+    <h1>🔑 Code de réinitialisation</h1>
     
     <% if (typeof message !== 'undefined') { %>
-        <div class="info-message">
-            <%= message %>
+        <div class="success-message">
+            ✅ <%= message %>
         </div>
     <% } %>
     
-    <form action="/users/restPasword" method="POST">
-        <div>
-            <label for="email">📧 Adresse email :</label>
-            <input type="email" id="email" name="email" required placeholder="Entrez votre adresse email">
-        </div>
-        <button type="submit">📤 Envoyer le code de réinitialisation</button>
-    </form>
+    <div class="email-info">
+        📧 Code envoyé à : <strong><%= email %></strong>
+    </div>
     
-    <div class="back-link">
-        <a href="/users/login">← Retour à la connexion</a>
+    <div class="instructions">
+        Veuillez saisir le code de réinitialisation à 4 chiffres que vous avez reçu par email.
+        <br><strong>Le code expire dans 1 heure.</strong>
+    </div>
+    
+    <form action="/users/modifieMotpasseByCode" method="POST">
+        <input type="hidden" name="email" value="<%= email %>">
+        <div>
+            <label for="code">🔢 Code de réinitialisation :</label>
+            <input type="text" id="code" name="code" required placeholder="____" maxlength="4" pattern="[0-9]{4}">
+        </div>
+        <button type="submit">✅ Vérifier le code</button>
+    </form>
+        <form action="/users/oublieMotpasse" method="post" style="display:inline;">
+            <input type="hidden" name="email" value="<%= email %>">
+            <button type="submit" style="background:none;border:none;color:#0066cc;cursor:pointer;font-size:14px;padding:0;">← Nouvel envoi de code</button>
+        </form>
+    
     </div>
 </body>
 </html>
