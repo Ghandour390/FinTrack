@@ -1,50 +1,57 @@
+require('dotenv').config();
 const express = require('express');
 const path = require('path');
-const mysql = require('mysql2/promise');
 
 const app = express();
 const PORT = process.env.PORT || 3000;
 
-const dbConfig = {
-  host: process.env.DB_HOST || 'localhost',
-  port: process.env.DB_PORT || 3306,
-  user: process.env.DB_USER || 'root',
-  password: process.env.DB_PASSWORD || '',
-  database: process.env.DB_NAME || ''
-};
+// Middlewares: body parsers must be registered before routes
+app.use(express.json({ limit: '1mb' }));
+app.use(express.urlencoded({ extended: true }));
 
-// إعداد EJS
+// Static files
+app.use(express.static(path.join(__dirname, 'public')));
+
+// View engine
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
-// Serve static files (js, css, images)
-app.use(express.static(path.join(__dirname, 'public')));
+// Routes
+const userRoutes = require('./routes/users');
+const categorieRoutes = require('./routes/categories');
 
-app.get('/db-health', async (req, res) => {
-  try {
-    const conn = await mysql.createConnection(dbConfig);
-    const [rows] = await conn.query('SELECT 1 AS ok');
-    await conn.end();
-    res.json({ db: 'ok', rows });
-  } catch (err) {
-    console.error('DB health check failed:', err.message);
-    res.status(500).json({ db: 'error', message: err.message });
-  }
-});
+app.use('/users', userRoutes);
+app.use('/categories', categorieRoutes);
+
+
 
 app.get('/', (req, res) => {
-  console.log('Rendering index.ejs');
   res.render('index');
 });
 
-app.get('/api', (req, res) => {
-  res.send('Hello from the API!');
+
+
+// 404 handler
+app.use((req, res) => {
+  res.status(404).send('Not Found');
 });
 
-app.get('/health', (req, res) => {
-  res.json({ status: 'ok' });
+// Error handler
+app.use((err, req, res, next) => {
+  console.error(err.stack);
+  res.status(500).json({ error: 'Internal Server Error' });
 });
 
-app.listen(PORT, () => {
+const server = app.listen(PORT, () => {
   console.log(`Express server listening on http://localhost:${PORT}`);
 });
+
+// Graceful shutdown
+process.on('SIGINT', async () => {
+  console.log('Shutting down server...');
+  server.close(() => {
+    console.log('HTTP server closed');
+    process.exit(0);
+  });
+});
+    
