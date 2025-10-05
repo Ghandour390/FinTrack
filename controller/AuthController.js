@@ -39,29 +39,36 @@ class AuthController {
   };
   
 
-  async login(req, res) {
-    const { email, password } = req.body;
-    try {
-      const user = await User.findOne({ where: { email } });
-      if (!user) {
-        return res.status(404).json({ message: "User not found" });
-      }
-      const isMatch = await bcrypt.compare(password, user.password);
-      if (!isMatch) {
-        return res.status(401).json({ message: "Invalid credentials" });
-      }
-      req.session.user = {
-        id: user.id,
-        email: user.email,
-        firstName: user.firstName,
-        lastName: user.lastName,
-      };
-      res.status(200).json({ message: "Login successful", user: req.session.user });
-    } catch (error) {
-      console.error("Error logging in:", error);
-      res.status(500).json({ message: "Internal server error" });
+ async login(req, res) {
+  // console.log("reste");
+  const { email, password } = req.body;
+  try {
+    const user = await User.findOne({ where: { email } });
+
+    if (!user) {
+      return res.render("login", { message: "user indifined" });
     }
+
+    const isMatch = await bcrypt.compare(password, user.password);
+    if (!isMatch) {
+      return res.render("login", { message: "password invalide" });
+    }
+
+    req.session.user = {
+      id: user.id,
+      email: user.email,
+      firstName: user.firstName,
+      lastName: user.lastName,
+    };
+
+    res.redirect("/dashboard");
+
+  } catch (error) {
+    console.error("Error logging in:", error);
+    res.render("login", { message: "Internal server error" });
   }
+}
+
 
   async modifieMotpasse(req, res) {
     const { email, oldPassword, newPassword } = req.body;

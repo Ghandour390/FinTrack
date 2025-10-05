@@ -16,9 +16,13 @@ module.exports = (sequelize, DataTypes) => {
   }
   Budgue.init({
     name: DataTypes.STRING,
-    description: DataTypes.STRING,
-    budgue: DataTypes.FLOAT,
-    categorie_id: DataTypes.INTEGER
+    description: DataTypes.TEXT,
+    budget: DataTypes.DECIMAL(10, 2),
+    spent: DataTypes.DECIMAL(10, 2),
+    categorie_id: DataTypes.INTEGER,
+    user_id: DataTypes.INTEGER,
+    period_start: DataTypes.DATE,
+    period_end: DataTypes.DATE
   }, {
     sequelize,
     modelName: 'Budgue',

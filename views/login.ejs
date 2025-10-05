@@ -65,11 +65,33 @@
         button:hover {
             background-color: #45a049;
         }
+        .message {
+            background-color: #f44336;
+            color: white;
+            padding: 15px;
+            border-radius: 4px;
+            margin-bottom: 20px;
+            text-align: center;
+        }
+        a {
+            color: #4CAF50;
+            text-decoration: none;
+            display: block;
+            text-align: center;
+            margin-top: 15px;
+        }
+        a:hover {
+            text-decoration: underline;
+        }
     </style>
 </head>
 <body>
+
+    <% if (typeof message !== 'undefined' && message) { %>
+        <div class="message"><%= message %></div>
+    <% } %>
+
     <h1>Login</h1>
-    <div>
     <form action="/users/login" method="POST">
         <div>
             <label for="email">Email:</label>
@@ -80,12 +102,10 @@
             <input type="password" id="password" name="password" required>
         </div>
         <button type="submit">Login</button>
-        <form id="motpasse" action="/users/modifieMotpasse" method="get">
-            
-              <a  type="submit" href="/users/modifieMotpasse">j'ai oublié mon mot de passe</a>
-            
-        </form>
+         <a href="/users/register" style="display: block; text-align: center; padding: 12px; background: #38e71d; color: #111618; text-decoration: none; border-radius: 4px; font-weight: 500;">Register</a>
+
+        <a href="/users/modifieMotpasse">j'ai oublié mon mot de passe</a>
     </form>
-    </div>
+
 </body>
 </html>

@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title || 'FinTrack' %></title>
+  <link rel="stylesheet" href="/css/style.css">
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+
+<div class="dashboard">
+  <div class="sidebar">
+    <div class="logo">💰 FinSolutions</div>
+    <ul>
+      <li class="active">📊 <a href="/dashboard" style="color: inherit; text-decoration: none;">Dashboard</a></li>
+      <li>💳 <a href="/transactions" style="color: inherit; text-decoration: none;">Transactions</a></li>
+      <li>📋 <a href="/budgues" style="color: inherit; text-decoration: none;">Budgets</a></li>
+      <li>📈 <a href="/reports" style="color: inherit; text-decoration: none;">Reports</a></li>
+      <li>⚙️ <a href="/settings" style="color: inherit; text-decoration: none;">Settings</a></li>
+    </ul>
+    <% if (typeof user !== 'undefined' && user) { %>
+    <div class="user">
+      <div class="avatar">👤</div>
+      <div>
+        <div><%= user.firstName %> <%= user.lastName %></div>
+        <small><%= user.email %></small>
+      </div>
+    </div>
+    <% } %>
+  </div>
+
+  <div class="main-content">
+    <div class="header">
+      <h1>Dashboard Overview</h1>
+      <div class="search-bar">    
+        <input type="text" placeholder="Search...">
+        <button>🔍</button>
+      </div>
+    </div>
+
+    <div class="stats-cards">
+      <div class="stat-card income">
+        <div class="stat-info">
+          <h3>Total Income</h3>
+          <h2>DH<%= income.toLocaleString() %></h2>
+          <span class="change positive">📈 +5.2%</span>
+        </div>
+      </div>
+      
+      <div class="stat-card expenses">
+        <div class="stat-info">
+          <h3>Total Expenses</h3>
+          <h2>DH<%= expenses.toLocaleString() %></h2>
+          <span class="change negative">📉 +2.1%</span>
+        </div>
+      </div>
+      
+      <div class="stat-card savings">
+        <div class="stat-info">
+          <h3>Savings Goal</h3>
+          <h2>DH<%= savingsGoal.current.toLocaleString() %> / DH<%= savingsGoal.target.toLocaleString() %></h2>
+          <div class="progress-bar">
+            <div class="progress-fill" style="width: <%= (savingsGoal.current/savingsGoal.target)*100 %>%"></div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-buttons">
+      <button class="btn primary" onclick="openAddModal()">➕ Add New Transaction</button>
+      <button class="btn secondary">📊 Set New Budget</button>
+    </div>
+
+    <div class="charts-section">
+      <div class="chart-container">
+        <h3>Expenses by Category</h3>
+        <canvas id="categoryChart"></canvas>
+      </div>
+      <div class="chart-container">
+        <h3>Financial Trends</h3>
+        <canvas id="trendChart"></canvas>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+  const ctx1 = document.getElementById("categoryChart");
+  new Chart(ctx1, {
+    type: "doughnut",
+    data: {
+      labels: <%- JSON.stringify(categoryNames) %>,
+      datasets: [{
+        data: <%- JSON.stringify(categoryData) %>,
+        backgroundColor: ["#1e40af", "#059669", "#ea580c", "#6b7280"]
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: {
+        legend: {
+          position: 'bottom'
+        }
+      }
+    }
+  });
+
+  const ctx2 = document.getElementById("trendChart");
+  new Chart(ctx2, {
+    type: "line",
+    data: {
+      labels: <%- JSON.stringify(trendLabels) %>,
+      datasets: [{
+        label: "Balance",
+        data: <%- JSON.stringify(trends) %>,
+        borderColor: "#1e40af",
+        backgroundColor: "rgba(30, 64, 175, 0.1)",
+        fill: true,
+        tension: 0.4
+      }]
+    },
+    options: {
+      responsive: true,
+      scales: {
+        y: {
+          beginAtZero: true
+        }
+      }
+    }
+  });
+</script>
+
+<!-- Add Transaction Modal (same as transactions.ejs) -->
+<div id="addModal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <h3>Add New Transaction</h3>
+    <form id="transactionForm">
+      <input type="text" name="description" placeholder="Description" required>
+      <input type="number" name="amount" placeholder="Amount" step="0.01" required>
+      <select name="type">
+        <option value="">Select Type</option>
+        <option value="revenu">Revenue</option>
+        <option value="depense">Expense</option>
+      </select>
+      <select name="categoryId">
+        <option value="">Select Category</option>
+        <% categories.forEach(cat => { %>
+        <option value="<%= cat.id %>"><%= cat.name %></option>
+        <% }); %>
+      </select>
+      <input type="date" name="date" required>
+      <div class="modal-actions">
+        <button type="button" onclick="closeModal()">Cancel</button>
+        <button type="submit">Add Transaction</button>
+      </div>
+    </form>
+  </div>
+  </div>
+
+<script src="/js/transactions.js"></script>
+
+</body>
+</html>

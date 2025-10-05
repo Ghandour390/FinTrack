@@ -10,14 +10,16 @@ module.exports = (sequelize, DataTypes) => {
      * The `models/index` file will call this method automatically.
      */
     static associate(models) {
-  
       Categorie.hasMany(models.Transaction, { foreignKey: 'categorie_id', as: 'transactions' });
-      Categorie.hasOne(models.Budgue, { foreignKey: 'categorie_id', as: 'budget' });
+      Categorie.hasMany(models.Budgue, { foreignKey: 'categorie_id', as: 'budgues' });
+      Categorie.belongsTo(models.User, { foreignKey: 'user_id', as: 'user' });
     }
   }
   Categorie.init({
     name: DataTypes.STRING,
-    description: DataTypes.STRING
+    description: DataTypes.STRING,
+    user_id: DataTypes.INTEGER
+
   }, {
     sequelize,
     modelName: 'Categorie',

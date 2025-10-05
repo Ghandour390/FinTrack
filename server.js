@@ -1,72 +1,76 @@
-require('dotenv').config();
 const express = require('express');
-const path = require('path');
 const session = require('express-session');
+const routeTransaction = require('./routes/transaction');
 
+
+const path = require('path');
+const mysql = require('mysql2/promise');
 const app = express();
 const PORT = process.env.PORT || 3000;
+const dbConfig = require('./config/config.js');
+const RouteBudget = require('./routes/budgue');
+const RouteUsers = require('./routes/users');
 
-// Middlewares: body parsers must be registered before routes
-app.use(express.json({ limit: '1mb' }));
-app.use(express.urlencoded({ extended: true }));
-
-// Sessions
 app.use(session({
-  secret: process.env.SESSION_SECRET || 'dev_session_secret',
+  secret: '123456',
   resave: false,
-  saveUninitialized: false,
-  cookie: {
-    httpOnly: true,
-    secure: false,
-    maxAge: 1000 * 60 * 60 * 2
-  }
+  saveUninitialized: true,
+  cookie: { secure: false } 
 }));
 
-// Static files
+// Middleware
 app.use(express.static(path.join(__dirname, 'public')));
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 
-// View engine
+// Routes (after body parsers)
+app.use('/budgues', RouteBudget);
+app.use('/api/budgues',RouteBudget);
+app.use('/transactions', routeTransaction);
+app.use('/api/transactions', routeTransaction);
+
+// EJS setup
 app.set('view engine', 'ejs');
 app.set('views', path.join(__dirname, 'views'));
 
+
 // Routes
-const userRoutes = require('./routes/users');
-const categorieRoutes = require('./routes/categories');
-const transactionRoutes = require('./routes/transaction');
-
-app.use('/users', userRoutes);
-app.use('/categories', categorieRoutes);
-app.use('/transactions', transactionRoutes);
+// app.get('/', (req, res) => {
+//   res.sendFile(path.join(__dirname, 'public', 'index.html'));
+// });
+// route 
+app.use('/users', RouteUsers);
 
 
+app.get('/health', (req, res) => {
+  res.json({ status: 'OK', timestamp: new Date().toISOString() });
+});
 
-app.get('/', (req, res) => {
-  res.render('index');
+app.get('/db-health', async (req, res) => {
+  try {
+    const connection = await mysql.createConnection(dbConfig.development);
+    await connection.execute('SELECT 1');
+    await connection.end();
+    res.json({ status: 'OK', database: 'Connected' });
+  } catch (error) {
+    res.status(500).json({ status: 'ERROR', database: 'Disconnected', error: error.message });
+  }
 });
 
 
+app.get('/dashboard', require('./controller/DashboardController').getDashboard);
 
-// 404 handler
-app.use((req, res) => {
-  res.status(404).send('Not Found');
-});
 
-// Error handler
-app.use((err, req, res, _next) => {
-  console.error(err.stack);
-  res.status(500).json({ error: 'Internal Server Error' });
-});
 
-const server = app.listen(PORT, () => {
-  console.log(`Express server listening on http://localhost:${PORT}`);
-});
 
-// Graceful shutdown
-process.on('SIGINT', async () => {
-  console.log('Shutting down server...');
-  server.close(() => {
-    console.log('HTTP server closed');
-    process.exit(0);
-  });
+
+app.get("/", (req, res)=>{
+  res.render('index')
+
+})
+
+
+
+app.listen(PORT, () => {
+  console.log(`Server running on http://localhost:${PORT}`);
 });
-    

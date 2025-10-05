@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= title || 'FinTrack' %></title>
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+<div class="budget-page">
+  <div class="budget-header">
+    <div class="brand">
+      🏢 FinSolutions
+    </div>
+    <div class="nav">
+      <a href="/dashboard">Dashboard</a>
+      <a href="/budgues" style="color: #3b82f6; font-weight: 600;">Budgets</a>
+      <a href="/accounts">Accounts</a>
+      <a href="/transactions">Transactions</a>
+      <a href="/reports">Reports</a>
+    </div>
+    <div class="header-icons">
+      <button class="icon-btn">🔔</button>
+      <button class="icon-btn">❓</button>
+      <div class="avatar">👤</div>
+    </div>
+  </div>
+
+  <div class="budget-content">
+    <div class="budget-title-row">
+      <h1>Manage Budgets</h1>
+      <button class="add-btn" onclick="openAddModal()">
+        ➕ Ajouter un Nouveau Budget
+      </button>
+    </div>
+
+    <div class="budget-list">
+      <% budgets.forEach(budget => { %>
+      <div class="budget-card <%= budget.status %>">
+        <div class="budget-left">
+          <div class="budget-icon <%= budget.color %>">
+            <%= budget.icon %>
+          </div>
+          <div class="budget-info">
+            <h3><%= budget.name %></h3>
+            <p class="budget-description"><%= budget.description %></p>
+            <p class="budget-category">Catégorie: <%= budget.categorie_name %></p>
+            <p class="<%= budget.status === 'overspent' ? 'overspent-text' : '' %>">
+              <%= budget.spent.toFixed(2) %>DH / <%= budget.limit.toFixed(2) %>DH
+              <% if (budget.status === 'overspent') { %>
+                - Dépassé de <%= (budget.spent - budget.limit).toFixed(2) %>DH
+              <% } %>
+            </p>
+          </div>
+        </div>
+        <div class="budget-right">
+          <div class="progress-container">
+            <div class="progress-bar">
+              <div class="progress-fill <%= budget.color %>" style="width: <%= Math.min((budget.spent/budget.limit)*100, 100) %>%"></div>
+            </div>
+          </div>
+          <span class="percentage <%= budget.status === 'overspent' ? 'overspent-text' : '' %>">
+            <%= Math.round((budget.spent/budget.limit)*100) %>%
+          </span>
+          <div class="budget-actions">
+            <button class="edit-btn" onclick="editBudget(<%= budget.id %>)">✏️</button>
+            <button class="delete-btn" onclick="deleteBudget(<%= budget.id %>)">🗑️</button>
+          </div>
+        </div>
+      </div>
+      <% }); %>
+    </div>
+  </div>
+</div>
+
+<!-- Add Budget Modal -->
+<div id="addBudgetModal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <h3>Ajouter un Nouveau Budget</h3>
+    <form id="budgetForm">
+      <input type="text" name="name" placeholder="Nom du Budget" required>
+      <input type="text" name="description" placeholder="Description" required>
+      <input type="number" name="limit" placeholder="Limite du Budget" step="0.01" required>
+      <select name="categorie_id" required>
+        <option value="">Sélectionner une catégorie</option>
+        <option value="1">Alimentation</option>
+        <option value="2">Transport</option>
+        <option value="3">Loisirs</option>
+        <option value="4">Logement</option>
+      </select>
+      <div class="modal-actions">
+        <button type="button" onclick="closeModal()">Annuler</button>
+        <button type="submit">Ajouter Budget</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<!-- Edit Budget Modal -->
+<div id="editBudgetModal" class="modal" style="display: none;">
+  <div class="modal-content">
+    <h3>Modifier le Budget</h3>
+    <form id="editBudgetForm">
+      <input type="hidden" id="editBudgetId">
+      <input type="text" id="editName" name="name" placeholder="Nom du Budget" required>
+      <input type="text" id="editDescription" name="description" placeholder="Description" required>
+      <input type="number" id="editLimit" name="limit" placeholder="Limite du Budget" step="0.01" required>
+      <select id="editCategorieId" name="categorie_id" required>
+        <option value="">Sélectionner une catégorie</option>
+        <option value="1">Alimentation</option>
+        <option value="2">Transport</option>
+        <option value="3">Loisirs</option>
+        <option value="4">Logement</option>
+      </select>
+      <div class="modal-actions">
+        <button type="button" onclick="closeEditModal()">Annuler</button>
+        <button type="submit">Modifier Budget</button>
+      </div>
+    </form>
+  </div>
+</div>
+
+<script>
+function openAddModal() {
+  document.getElementById('addBudgetModal').style.display = 'flex';
+}
+
+function closeModal() {
+  document.getElementById('addBudgetModal').style.display = 'none';
+}
+
+function closeEditModal() {
+  document.getElementById('editBudgetModal').style.display = 'none';
+}
+
+function editBudget(id) {
+  fetch(`/api/budgues/${id}`)
+    .then(response => response.json())
+    .then(budget => {
+      document.getElementById('editBudgetId').value = budget.id;
+      document.getElementById('editName').value = budget.name;
+      document.getElementById('editDescription').value = budget.description;
+      document.getElementById('editLimit').value = budget.budgue;
+      document.getElementById('editCategorieId').value = budget.categorie_id;
+      document.getElementById('editBudgetModal').style.display = 'flex';
+    });
+}
+
+function deleteBudget(id) {
+  if (confirm('Êtes-vous sûr de vouloir supprimer ce budget ?')) {
+    fetch(`/api/budgues/${id}`, { method: 'DELETE' })
+      .then(() => location.reload());
+  }
+}
+
+document.getElementById('budgetForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const data = Object.fromEntries(formData);
+  
+  try {
+    const response = await fetch('/api/budgues', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    
+    if (response.ok) {
+      location.reload();
+    } else {
+      const error = await response.json();
+      alert('Erreur lors de l\'ajout du budget: ' + error.error);
+    }
+  } catch (error) {
+    alert('Erreur lors de l\'ajout du budget');
+  }
+});
+
+document.getElementById('editBudgetForm').addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const formData = new FormData(e.target);
+  const data = Object.fromEntries(formData);
+  const id = document.getElementById('editBudgetId').value;
+  
+  try {
+    const response = await fetch(`/api/budgues/${id}`, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(data)
+    });
+    
+    if (response.ok) {
+      location.reload();
+    } else {
+      const error = await response.json();
+      alert('Erreur lors de la modification: ' + error.error);
+    }
+  } catch (error) {
+    alert('Erreur lors de la modification');
+  }
+});
+</script>
+
+</body>
+</html>
